@@ -1,0 +1,13 @@
+services:
+  db_test:
+    container_name: test_mysql
+    image: mysql:9.2
+    restart: always
+    ports:
+      - 33007:3306
+    volumes: ['./volumes/mysql-test:/var/lib/mysql']
+    environment:
+      MYSQL_ROOT_PASSWORD: asdofhasdfh234234gdsf
+      MYSQL_DATABASE: testdb
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: dev

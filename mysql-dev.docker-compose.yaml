@@ -1,0 +1,13 @@
+services:
+  db_dev:
+    container_name: dev_mysql
+    image: mysql:9.2
+    restart: always
+    ports:
+      - 33006:3306
+    volumes: ['./volumes/mysql-dev:/var/lib/mysql']
+    environment:
+      MYSQL_ROOT_PASSWORD: asdofhasdfh234234gdsf
+      MYSQL_DATABASE: devdb
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: dev
