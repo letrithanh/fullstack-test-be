@@ -17,4 +17,14 @@ export default class EventService {
         
         return await PRISMA.event.create({ data });
     }
+
+    async getEvents(query: { title?: string }) {
+        const where: any = {};
+
+        if (query.title) {
+            where.title = { contains: query.title };
+        }
+
+        return await PRISMA.event.findMany({ where });
+    }
 }
