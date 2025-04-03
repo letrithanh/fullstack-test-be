@@ -8,6 +8,7 @@ jest.mock('../../../utils/prisma.client', () => ({
         create: jest.fn(),
         findMany: jest.fn(),
         findUnique: jest.fn(),
+        update: jest.fn(),
     },
 }));
 
@@ -155,6 +156,53 @@ describe("EventService", () => {
             const result = await eventService.getEventById(1);
 
             expect(result).toEqual(event);
+        });
+    });
+
+    describe("deleteEventById", () => {
+        it("should call PRISMA.event.update with the correct parameters", async () => {
+            const mockPrismaEventFindUnique = PRISMA.event.findUnique as jest.Mock;
+            mockPrismaEventFindUnique.mockResolvedValue({ id: 1, title: "Test Event" });
+            const mockPrismaEventUpdate = PRISMA.event.update as jest.Mock;
+            mockPrismaEventUpdate.mockResolvedValue({ id: 1, deleted: true });
+
+            const id = 1;
+            await eventService.deleteEventById(id);
+
+            expect(mockPrismaEventUpdate).toHaveBeenCalledWith({
+                where: { id: id },
+                data: { deleted: true },
+            });
+        });
+
+        it("should throw an error if the id is not a number", async () => {
+            const mockPrismaEventFindUnique = PRISMA.event.findUnique as jest.Mock;
+            mockPrismaEventFindUnique.mockResolvedValue({ id: 1, title: "Test Event" });
+            const mockPrismaEventUpdate = PRISMA.event.update as jest.Mock;
+            mockPrismaEventUpdate.mockResolvedValue({ id: 1, deleted: true });
+
+            // @ts-expect-error
+            await expect(eventService.deleteEventById("test")).rejects.toThrow("Invalid event ID provided.");
+        });
+
+        it("should throw an error if the event is not found", async () => {
+            const mockPrismaEventFindUnique = PRISMA.event.findUnique as jest.Mock;
+            mockPrismaEventFindUnique.mockResolvedValue(null);
+
+            const id = 1;
+            await expect(eventService.deleteEventById(id)).rejects.toThrow("Event not found.");
+        });
+
+        it("should return the updated event", async () => {
+            const mockPrismaEventFindUnique = PRISMA.event.findUnique as jest.Mock;
+            mockPrismaEventFindUnique.mockResolvedValue({ id: 1, title: "Test Event" });
+            const mockPrismaEventUpdate = PRISMA.event.update as jest.Mock;
+            mockPrismaEventUpdate.mockResolvedValue({ id: 1, title: "Test Event", deleted: true });
+
+            const id = 1;
+            const result = await eventService.deleteEventById(id);
+
+            expect(result).toEqual({ id: 1, title: "Test Event", deleted: true });
         });
     });
 });

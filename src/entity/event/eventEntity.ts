@@ -7,4 +7,5 @@ export default interface EventEntity {
     maxAttendees: number;
     createdAt?: Date;
     updatedAt?: Date;
+    deleted?: boolean;
 }
