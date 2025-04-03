@@ -205,4 +205,69 @@ describe("EventService", () => {
             expect(result).toEqual({ id: 1, title: "Test Event", deleted: true });
         });
     });
+
+    describe("updateEventById", () => {
+        it("should call PRISMA.event.update with the correct parameters", async () => {
+            const mockPrismaEventFindUnique = PRISMA.event.findUnique as jest.Mock;
+            mockPrismaEventFindUnique.mockResolvedValue({ id: 1, title: "Test Event" });
+            const mockPrismaEventUpdate = PRISMA.event.update as jest.Mock;
+            mockPrismaEventUpdate.mockResolvedValue({ id: 1, title: "Updated Test Event" });
+
+            const id = 1;
+            const updatedEventData: EventEntity = { title: "Updated Test Event", description: "This is an updated description.", date: new Date(), location: "Updated Test Location", maxAttendees: 60 };
+            await eventService.updateEventById(id, updatedEventData);
+
+            expect(mockPrismaEventUpdate).toHaveBeenCalledWith({
+                where: { id: id },
+                data: updatedEventData,
+            });
+        });
+
+        it("should throw an error if the id is not a number", async () => {
+            const mockPrismaEventFindUnique = PRISMA.event.findUnique as jest.Mock;
+            mockPrismaEventFindUnique.mockResolvedValue({ id: 1, title: "Test Event" });
+            const mockPrismaEventUpdate = PRISMA.event.update as jest.Mock;
+            mockPrismaEventUpdate.mockResolvedValue({ id: 1, title: "Updated Test Event" });
+
+            const updatedEventData: EventEntity = { title: "Updated Test Event", description: "This is an updated description.", date: new Date(), location: "Updated Test Location", maxAttendees: 60 };
+
+            // @ts-expect-error
+            await expect(eventService.updateEventById("test", updatedEventData)).rejects.toThrow("Invalid event ID provided.");
+        });
+
+        it("should throw an error if the event is not found", async () => {
+            const mockPrismaEventFindUnique = PRISMA.event.findUnique as jest.Mock;
+            mockPrismaEventFindUnique.mockResolvedValue(null);
+            const mockPrismaEventUpdate = PRISMA.event.update as jest.Mock;
+            mockPrismaEventUpdate.mockResolvedValue({ id: 1, title: "Updated Test Event" });
+
+            const id = 1;
+            const updatedEventData: EventEntity = { title: "Updated Test Event", description: "This is an updated description.", date: new Date(), location: "Updated Test Location", maxAttendees: 60 };
+            await expect(eventService.updateEventById(id, updatedEventData)).rejects.toThrow("Event not found.");
+        });
+
+        it("should return the updated event", async () => {
+            const mockPrismaEventFindUnique = PRISMA.event.findUnique as jest.Mock;
+            mockPrismaEventFindUnique.mockResolvedValue({ id: 1, title: "Test Event" });
+            const mockPrismaEventUpdate = PRISMA.event.update as jest.Mock;
+            mockPrismaEventUpdate.mockResolvedValue({ id: 1, title: "Updated Test Event", description: "This is an updated description.", date: new Date(), location: "Updated Test Location", maxAttendees: 60 });
+
+            const id = 1;
+            const updatedEventData: EventEntity = { title: "Updated Test Event", description: "This is an updated description.", date: new Date(), location: "Updated Test Location", maxAttendees: 60 };
+            const result = await eventService.updateEventById(id, updatedEventData);
+
+            expect(result).toEqual({ id: 1, title: "Updated Test Event", description: "This is an updated description.", date: new Date(), location: "Updated Test Location", maxAttendees: 60 });
+        });
+
+        it("should throw an error if the event data is invalid", async () => {
+            const mockPrismaEventFindUnique = PRISMA.event.findUnique as jest.Mock;
+            mockPrismaEventFindUnique.mockResolvedValue({ id: 1, title: "Test Event" });
+            const mockPrismaEventUpdate = PRISMA.event.update as jest.Mock;
+            mockPrismaEventUpdate.mockResolvedValue({ id: 1, title: "Updated Test Event" });
+
+            const id = 1;
+            const invalidEventData: EventEntity = { title: "", description: "This is an updated description.", date: new Date(), location: "Updated Test Location", maxAttendees: 60 };
+            await expect(eventService.updateEventById(id, invalidEventData)).rejects.toThrow("Invalid event data provided.");
+        });
+    });
 });
