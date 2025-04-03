@@ -256,7 +256,7 @@ describe("EventService", () => {
             const updatedEventData: EventEntity = { title: "Updated Test Event", description: "This is an updated description.", date: new Date(), location: "Updated Test Location", maxAttendees: 60 };
             const result = await eventService.updateEventById(id, updatedEventData);
 
-            expect(result).toEqual({ id: 1, title: "Updated Test Event", description: "This is an updated description.", date: new Date(), location: "Updated Test Location", maxAttendees: 60 });
+            expect(result).toEqual({ id: 1, title: "Updated Test Event", description: "This is an updated description.", date: updatedEventData.date, location: "Updated Test Location", maxAttendees: 60});
         });
 
         it("should throw an error if the event data is invalid", async () => {
