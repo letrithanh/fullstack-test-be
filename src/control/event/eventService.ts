@@ -1,5 +1,5 @@
-import EventEntity from "../entity/event/eventEntity";
-import PRISMA from "../utils/prisma.client";
+import EventEntity from "../../entity/event/eventEntity";
+import PRISMA from "../../utils/prisma.client";
 import EventValidator from "./eventValidator";
 
 export default class EventService {

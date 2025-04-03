@@ -1,9 +1,9 @@
-import EventService from "../../control/eventService";
-import PRISMA from "../../utils/prisma.client";
-import EventEntity from "../../entity/event/eventEntity";
+import EventService from "../../../control/event/eventService";
+import PRISMA from "../../../utils/prisma.client";
+import EventEntity from "../../../entity/event/eventEntity";
 
 // Mock only the Prisma client
-jest.mock('../../utils/prisma.client', () => ({
+jest.mock('../../../utils/prisma.client', () => ({
     event: {
         create: jest.fn(),
         findMany: jest.fn(),
