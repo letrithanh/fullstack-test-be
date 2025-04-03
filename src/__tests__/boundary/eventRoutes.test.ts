@@ -57,4 +57,58 @@ describe("Event Routes", () => {
             expect(response.body).toEqual({ message: "Invalid event data provided." });
         });
     });
+
+    describe("GET /events", () => {
+        it("should return 200 OK and all events", async () => {
+            // Create a test event
+            const createdEvent = await PRISMA.event.create({ data: validEventData });
+
+            const response = await request(app).get("/events");
+
+            expect(response.status).toBe(200);
+            expect(response.body).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        id: createdEvent.id,
+                        title: createdEvent.title,
+                        description: createdEvent.description,
+                        date: createdEvent.date.toISOString(),
+                        location: createdEvent.location,
+                        maxAttendees: createdEvent.maxAttendees,
+                        createdAt: createdEvent.createdAt.toISOString(),
+                        updatedAt: createdEvent.updatedAt.toISOString(),
+                    }),
+                ])
+            );
+
+            // Clean up the test event
+            await PRISMA.event.delete({ where: { id: createdEvent.id } });
+        });
+
+        it("should return 200 OK and events filtered by title", async () => {
+            // Create a test event
+            const createdEvent = await PRISMA.event.create({ data: validEventData });
+
+            const response = await request(app).get("/events?title=Valid");
+
+            expect(response.status).toBe(200);
+            expect(response.body).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        id: createdEvent.id,
+                        title: createdEvent.title,
+                        description: createdEvent.description,
+                        date: createdEvent.date.toISOString(),
+                        location: createdEvent.location,
+                        maxAttendees: createdEvent.maxAttendees,
+                        createdAt: createdEvent.createdAt.toISOString(),
+                        updatedAt: createdEvent.updatedAt.toISOString(),
+                    }),
+                ])
+            );
+
+            // Clean up the test event
+            await PRISMA.event.delete({ where: { id: createdEvent.id } });
+        });
+    });
 });

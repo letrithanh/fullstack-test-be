@@ -16,4 +16,13 @@ export default class EventController {
             res.status(500).json({ message: (error as Error).message });
         }
     }
+
+    async getEvents(req: Request, res: Response) {
+        try {
+            const events = await this.eventService.getEvents(req.query);
+            res.status(200).json(events);
+        } catch (error) {
+            res.status(500).json({ message: (error as Error).message });
+        }
+    }
 }

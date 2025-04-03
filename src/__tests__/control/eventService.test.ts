@@ -6,6 +6,7 @@ import EventEntity from "../../entity/event/eventEntity";
 jest.mock('../../utils/prisma.client', () => ({
     event: {
         create: jest.fn(),
+        findMany: jest.fn(),
     },
 }));
 
@@ -92,6 +93,37 @@ describe("EventService", () => {
 
             // Assert
             expect(result).toEqual(createdEvent);
+        });
+    });
+
+    describe("getEvents", () => {
+        it("should call PRISMA.event.findMany with the correct where clause when a title is provided", async () => {
+            const mockPrismaEventFindMany = PRISMA.event.findMany as jest.Mock;
+            mockPrismaEventFindMany.mockResolvedValue([]);
+
+            const title = "Test";
+            await eventService.getEvents({ title });
+
+            expect(mockPrismaEventFindMany).toHaveBeenCalledWith({ where: { title: { contains: title } } });
+        });
+
+        it("should call PRISMA.event.findMany with an empty where clause when no title is provided", async () => {
+            const mockPrismaEventFindMany = PRISMA.event.findMany as jest.Mock;
+            mockPrismaEventFindMany.mockResolvedValue([]);
+
+            await eventService.getEvents({});
+
+            expect(mockPrismaEventFindMany).toHaveBeenCalledWith({ where: {} });
+        });
+
+        it("should return the events returned by PRISMA.event.findMany", async () => {
+            const mockPrismaEventFindMany = PRISMA.event.findMany as jest.Mock;
+            const events = [{ id: 1, title: "Test Event" }] as any;
+            mockPrismaEventFindMany.mockResolvedValue(events);
+
+            const result = await eventService.getEvents({});
+
+            expect(result).toEqual(events);
         });
     });
 });

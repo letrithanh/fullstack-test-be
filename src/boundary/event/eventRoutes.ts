@@ -7,6 +7,7 @@ const router = Router();
 const eventController = new EventController();
 
 router.post("/", eventController.createEvent.bind(eventController));
+router.get("/", eventController.getEvents.bind(eventController));
 
 export default router;
 
