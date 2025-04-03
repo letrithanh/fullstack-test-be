@@ -41,4 +41,14 @@ export default class EventController {
             res.status(500).json({ message: (error as Error).message });
         }
     }
+
+    async deleteEventById(req: Request, res: Response) {
+        try {
+            const id = parseInt(req.params.id);
+            await this.eventService.deleteEventById(id);
+            res.status(204).send();
+        } catch (error) {
+            res.status(500).json({ message: (error as Error).message });
+        }
+    }
 }

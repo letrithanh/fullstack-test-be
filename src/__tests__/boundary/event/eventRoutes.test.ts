@@ -41,6 +41,7 @@ describe("Event Routes", () => {
                 maxAttendees: validEventData.maxAttendees,
                 createdAt: expect.any(String),
                 updatedAt: expect.any(String),
+                deleted: false,
             });
         });
 
@@ -129,6 +130,7 @@ describe("Event Routes", () => {
                 maxAttendees: createdEvent.maxAttendees,
                 createdAt: createdEvent.createdAt.toISOString(),
                 updatedAt: createdEvent.updatedAt.toISOString(),
+                deleted: false,
             });
 
             // Clean up the test event
@@ -147,6 +149,30 @@ describe("Event Routes", () => {
 
             expect(response.status).toBe(500);
             expect(response.body).toEqual({ message: "Invalid event ID provided." });
+        });
+    });
+
+    describe("DELETE /events/:id", () => {
+        it("should return 204 No Content if the event is successfully soft-deleted", async () => {
+            // Create a test event
+            const createdEvent = await PRISMA.event.create({ data: validEventData });
+
+            const response = await request(app).delete(`/events/${createdEvent.id}`);
+
+            expect(response.status).toBe(204);
+
+            // Verify that the event is soft-deleted
+            const deletedEvent = await PRISMA.event.findUnique({ where: { id: createdEvent.id } });
+            expect(deletedEvent?.deleted).toBe(true);
+
+            // Clean up the test event
+            await PRISMA.event.delete({ where: { id: createdEvent.id } });
+        });
+
+        it("should return 500 Internal Server Error if the event id does not exist", async () => {
+            const response = await request(app).delete("/events/9999");
+
+            expect(response.status).toBe(500);
         });
     });
 });
