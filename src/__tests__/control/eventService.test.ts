@@ -7,6 +7,7 @@ jest.mock('../../utils/prisma.client', () => ({
     event: {
         create: jest.fn(),
         findMany: jest.fn(),
+        findUnique: jest.fn(),
     },
 }));
 
@@ -123,7 +124,37 @@ describe("EventService", () => {
 
             const result = await eventService.getEvents({});
 
-            expect(result).toEqual(events);
+        expect(result).toEqual(events);
+        });
+    });
+
+    describe("getEventById", () => {
+        it("should call PRISMA.event.findUnique with the correct id", async () => {
+            const mockPrismaEventFindUnique = PRISMA.event.findUnique as jest.Mock;
+            mockPrismaEventFindUnique.mockResolvedValue({});
+
+            const id = 1;
+            await eventService.getEventById(id);
+
+            expect(mockPrismaEventFindUnique).toHaveBeenCalledWith({ where: { id: id } });
+        });
+
+        it("should throw an error if the id is not a number", async () => {
+            const mockPrismaEventFindUnique = PRISMA.event.findUnique as jest.Mock;
+            mockPrismaEventFindUnique.mockResolvedValue({});
+
+            // @ts-expect-error
+            await expect(eventService.getEventById("test")).rejects.toThrow("Invalid event ID provided.");
+        });
+
+        it("should return the event returned by PRISMA.event.findUnique", async () => {
+            const mockPrismaEventFindUnique = PRISMA.event.findUnique as jest.Mock;
+            const event = { id: 1, title: "Test Event" } as any;
+            mockPrismaEventFindUnique.mockResolvedValue(event);
+
+            const result = await eventService.getEventById(1);
+
+            expect(result).toEqual(event);
         });
     });
 });

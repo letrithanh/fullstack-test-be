@@ -25,4 +25,21 @@ export default class EventController {
             res.status(500).json({ message: (error as Error).message });
         }
     }
+
+    async getEventById(req: Request, res: Response) {
+        try {
+            const id = parseInt(req.params.id);
+            const event = await this.eventService.getEventById(id);
+            let statusCode = 200;
+            let message: string = "Event not found";
+            if (!event) {
+                statusCode = 404;
+            }
+
+            res.status(statusCode).json(event || { message });
+        } catch (error) {
+            console.log({ error });
+            res.status(500).json({ message: (error as Error).message });
+        }
+    }
 }
