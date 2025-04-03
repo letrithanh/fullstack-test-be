@@ -22,6 +22,7 @@ model Event {
   maxAttendees Int             @default(100)
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
+  deleted      Boolean         @default(false)
   registrations EventRegistration[]
 }
 
