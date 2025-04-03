@@ -1,4 +1,4 @@
-import EventEntity from "../entity/event/eventEntity";
+import EventEntity from "../../entity/event/eventEntity";
 
 export default class EventValidator {
 

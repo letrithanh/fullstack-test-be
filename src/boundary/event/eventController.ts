@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import EventService from "../../control/eventService";
+import EventService from "../../control/event/eventService";
 
 export default class EventController {
     private eventService: EventService;
@@ -38,7 +38,6 @@ export default class EventController {
 
             res.status(statusCode).json(event || { message });
         } catch (error) {
-            console.log({ error });
             res.status(500).json({ message: (error as Error).message });
         }
     }

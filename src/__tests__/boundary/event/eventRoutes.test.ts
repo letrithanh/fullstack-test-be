@@ -1,7 +1,7 @@
 import request from "supertest";
-import app from "../../app";
-import EventEntity from "../../entity/event/eventEntity";
-import PRISMA from "../../utils/prisma.client";
+import app from "../../../app";
+import EventEntity from "../../../entity/event/eventEntity";
+import PRISMA from "../../../utils/prisma.client";
 
 describe("Event Routes", () => {
     let validEventData: EventEntity;

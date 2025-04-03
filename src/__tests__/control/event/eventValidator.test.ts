@@ -1,4 +1,4 @@
-import EventValidator from "../../control/eventValidator";
+import EventValidator from "../../../control/event/eventValidator";
 
 describe("EventValidator", () => {
     let eventValidator: EventValidator;
