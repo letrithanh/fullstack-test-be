@@ -8,6 +8,7 @@ const eventController = new EventController();
 
 router.post("/", eventController.createEvent.bind(eventController));
 router.get("/", eventController.getEvents.bind(eventController));
+router.get("/:id", eventController.getEventById.bind(eventController));
 
 export default router;
 

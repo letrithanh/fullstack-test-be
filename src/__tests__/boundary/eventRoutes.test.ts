@@ -111,4 +111,42 @@ describe("Event Routes", () => {
             await PRISMA.event.delete({ where: { id: createdEvent.id } });
         });
     });
+
+    describe("GET /events/:id", () => {
+        it("should return 200 OK and the event if the id is valid", async () => {
+            // Create a test event
+            const createdEvent = await PRISMA.event.create({ data: validEventData });
+
+            const response = await request(app).get(`/events/${createdEvent.id}`);
+
+            expect(response.status).toBe(200);
+            expect(response.body).toEqual({
+                id: createdEvent.id,
+                title: createdEvent.title,
+                description: createdEvent.description,
+                date: createdEvent.date.toISOString(),
+                location: createdEvent.location,
+                maxAttendees: createdEvent.maxAttendees,
+                createdAt: createdEvent.createdAt.toISOString(),
+                updatedAt: createdEvent.updatedAt.toISOString(),
+            });
+
+            // Clean up the test event
+            await PRISMA.event.delete({ where: { id: createdEvent.id } });
+        });
+
+        it("should return 404 Not Found if the event id is invalid", async () => {
+            const response = await request(app).get("/events/9999");
+
+            expect(response.status).toBe(404);
+            expect(response.body).toEqual({ message: "Event not found" });
+        });
+
+        it("should return 500 Internal Server Error if the event id is not a number", async () => {
+            const response = await request(app).get("/events/abc");
+
+            expect(response.status).toBe(500);
+            expect(response.body).toEqual({ message: "Invalid event ID provided." });
+        });
+    });
 });

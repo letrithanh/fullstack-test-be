@@ -27,4 +27,19 @@ export default class EventService {
 
         return await PRISMA.event.findMany({ where });
     }
+
+    async getEventById(id: number) {
+        const isNotNumber = typeof id !== 'number';
+        const isNotInteger = !Number.isInteger(id);
+
+        if (isNotNumber || isNotInteger) {
+            throw new Error("Invalid event ID provided.");
+        }
+
+        return await PRISMA.event.findUnique({
+            where: {
+                id: id,
+            },
+        });
+    }
 }
