@@ -66,4 +66,31 @@ export default class EventService {
             },
         });
     }
+
+    async updateEventById(id: number, data: EventEntity) {
+        const isNotNumber = typeof id !== 'number';
+        const isNotInteger = !Number.isInteger(id);
+
+        if (isNotNumber || isNotInteger) {
+            throw new Error("Invalid event ID provided.");
+        }
+
+        const isValid = this.eventValidator.isEventValid(data);
+        if (!isValid) {
+            throw new Error("Invalid event data provided.");
+        }
+
+        const event = await this.getEventById(id);
+
+        if (!event) {
+            throw new Error("Event not found.");
+        }
+
+        return await PRISMA.event.update({
+            where: {
+                id: id,
+            },
+            data: data,
+        });
+    }
 }

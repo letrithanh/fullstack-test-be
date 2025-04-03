@@ -175,4 +175,72 @@ describe("Event Routes", () => {
             expect(response.status).toBe(500);
         });
     });
+
+    describe("PUT /events/:id", () => {
+        it("should return 200 OK and the updated event if the data is valid", async () => {
+            // Create a test event
+            const createdEvent = await PRISMA.event.create({ data: validEventData });
+
+            const updatedEventData = {
+                title: "Updated Test Event",
+                description: "This is an updated description.",
+                date: new Date().toISOString(),
+                location: "Updated Test Location",
+                maxAttendees: 60,
+            };
+
+            const response = await request(app)
+                .put(`/events/${createdEvent.id}`)
+                .send(updatedEventData)
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json');
+
+            expect(response.status).toBe(200);
+            expect(response.body).toEqual({
+                id: createdEvent.id,
+                title: updatedEventData.title,
+                description: updatedEventData.description,
+                date: updatedEventData.date,
+                location: updatedEventData.location,
+                maxAttendees: updatedEventData.maxAttendees,
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String),
+                deleted: false,
+            });
+        });
+
+        it("should return 404 Not Found if the event id does not exist", async () => {
+            const updatedEventData = {
+                title: "Updated Test Event",
+                description: "This is an updated description.",
+                date: new Date().toISOString(),
+                location: "Updated Test Location",
+                maxAttendees: 60,
+            };
+
+            const response = await request(app)
+                .put("/events/9999")
+                .send(updatedEventData)
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json');
+
+            expect(response.status).toBe(500);
+        });
+
+        it("should return 500 Internal Server Error if the request body is invalid", async () => {
+             // Create a test event
+             const createdEvent = await PRISMA.event.create({ data: validEventData });
+
+            const invalidEventData = { ...validEventData, title: "" }; // Invalid title
+
+            const response = await request(app)
+                .put(`/events/${createdEvent.id}`)
+                .send(invalidEventData)
+                .set('Content-Type', 'application/json')
+                .set('Accept', 'application/json');
+
+            expect(response.status).toBe(500);
+            expect(response.body).toEqual({ message: "Invalid event data provided." });
+        });
+    });
 });
