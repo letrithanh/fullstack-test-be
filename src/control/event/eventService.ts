@@ -1,5 +1,6 @@
 import EventEntity from "../../entity/event/eventEntity";
 import PRISMA from "../../utils/prisma.client";
+import EventRegistrationService from "../eventRegistration/eventRegistrationService";
 import EventValidator from "./eventValidator";
 
 export default class EventService {
@@ -12,9 +13,9 @@ export default class EventService {
     async createEvent(data: EventEntity) {
         const isValid = this.eventValidator.isEventValid(data);
         if (!isValid) {
-            throw new Error("Invalid event data provided."); 
+            throw new Error("Invalid event data provided.");
         }
-        
+
         return await PRISMA.event.create({ data });
     }
 
@@ -25,11 +26,20 @@ export default class EventService {
             where.title = { contains: query.title };
         }
 
-        return await PRISMA.event.findMany({ where });
+        where.deleted = false;
+
+        const events = await PRISMA.event.findMany({ where });
+        
+        const eventRegistrationService = new EventRegistrationService();
+        const mappedEventIdsAttendees = await eventRegistrationService.getEventAttendeeCounts();
+        return events.map((event) => ({
+            ...event,
+            joinedAttendee: mappedEventIdsAttendees[event.id] || 0,
+        }));
     }
 
     async getEventById(id: number) {
-        const isNotNumber = typeof id !== 'number';
+        const isNotNumber = typeof id !== "number";
         const isNotInteger = !Number.isInteger(id);
 
         if (isNotNumber || isNotInteger) {
@@ -44,7 +54,7 @@ export default class EventService {
     }
 
     async deleteEventById(id: number) {
-        const isNotNumber = typeof id !== 'number';
+        const isNotNumber = typeof id !== "number";
         const isNotInteger = !Number.isInteger(id);
 
         if (isNotNumber || isNotInteger) {
@@ -68,7 +78,7 @@ export default class EventService {
     }
 
     async updateEventById(id: number, data: EventEntity) {
-        const isNotNumber = typeof id !== 'number';
+        const isNotNumber = typeof id !== "number";
         const isNotInteger = !Number.isInteger(id);
 
         if (isNotNumber || isNotInteger) {
