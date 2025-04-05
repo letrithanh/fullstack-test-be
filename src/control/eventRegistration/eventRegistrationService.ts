@@ -5,23 +5,23 @@ import PRISMA from "../../utils/prisma.client";
 
 export default class EventRegistrationService {
     private attendeeService: AttendeeService;
-    private eventService: EventService;
 
     constructor() {
         this.attendeeService = new AttendeeService();
-        this.eventService = new EventService();
     }
 
     private async eventChecker(eventId: number) {
-        const event = await this.eventService.getEventById(eventId);
+        const eventService = new EventService();
+        const event = await eventService.getEventById(eventId);
+
+        const isEventDeleted = event?.deleted;
+        if (isEventDeleted) {
+            throw new Error("Event is deleted");
+        }
+
         const isEventNotFound = !event;
         if (isEventNotFound) {
             throw new Error("Event not found");
-        }
-
-        const isEventDeleted = event.deleted;
-        if (isEventDeleted) {
-            throw new Error("Event is deleted");
         }
 
         const attendeeCount = await PRISMA.eventRegistration.count({
@@ -87,5 +87,24 @@ export default class EventRegistrationService {
                 attendeeId: attendee.id!,
             },
         });
+    }
+
+    public async getEventAttendeeCounts(): Promise<{
+        [eventId: number]: number;
+    }> {
+        const eventRegistrations = await PRISMA.eventRegistration.groupBy({
+            by: ["eventId"],
+            _count: {
+                eventId: true,
+            },
+        });
+
+        const eventAttendeeCounts: { [eventId: number]: number } = {};
+        eventRegistrations.forEach((registration) => {
+            eventAttendeeCounts[registration.eventId] =
+                registration._count.eventId;
+        });
+
+        return eventAttendeeCounts;
     }
 }

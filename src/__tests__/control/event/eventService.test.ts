@@ -10,6 +10,9 @@ jest.mock('../../../utils/prisma.client', () => ({
         findUnique: jest.fn(),
         update: jest.fn(),
     },
+    eventRegistration: {
+        groupBy: jest.fn()
+    }
 }));
 
 describe("EventService", () => {
@@ -99,6 +102,11 @@ describe("EventService", () => {
     });
 
     describe("getEvents", () => {
+        beforeEach(() => {
+            const mockPrismaEventRegistrationGroupBy = PRISMA.eventRegistration.groupBy as jest.Mock;
+            mockPrismaEventRegistrationGroupBy.mockResolvedValue([ { _count: { eventId: 2 }, eventId: 1 } ])
+        })
+
         it("should call PRISMA.event.findMany with the correct where clause when a title is provided", async () => {
             const mockPrismaEventFindMany = PRISMA.event.findMany as jest.Mock;
             mockPrismaEventFindMany.mockResolvedValue([]);
@@ -106,7 +114,7 @@ describe("EventService", () => {
             const title = "Test";
             await eventService.getEvents({ title });
 
-            expect(mockPrismaEventFindMany).toHaveBeenCalledWith({ where: { title: { contains: title } } });
+            expect(mockPrismaEventFindMany).toHaveBeenCalledWith({ where: { title: { contains: title }, deleted: false } });
         });
 
         it("should call PRISMA.event.findMany with an empty where clause when no title is provided", async () => {
@@ -115,17 +123,17 @@ describe("EventService", () => {
 
             await eventService.getEvents({});
 
-            expect(mockPrismaEventFindMany).toHaveBeenCalledWith({ where: {} });
+            expect(mockPrismaEventFindMany).toHaveBeenCalledWith({ where: {deleted: false} });
         });
 
         it("should return the events returned by PRISMA.event.findMany", async () => {
             const mockPrismaEventFindMany = PRISMA.event.findMany as jest.Mock;
-            const events = [{ id: 1, title: "Test Event" }] as any;
+            const events = [{ id: 1, title: "Test Event", joinedAttendee: 2 }] as any;
             mockPrismaEventFindMany.mockResolvedValue(events);
 
             const result = await eventService.getEvents({});
 
-        expect(result).toEqual(events);
+            expect(result).toEqual(events);
         });
     });
 
