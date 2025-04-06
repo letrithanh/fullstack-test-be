@@ -277,5 +277,26 @@ describe("EventService", () => {
             const invalidEventData: EventEntity = { title: "", description: "This is an updated description.", date: new Date(), location: "Updated Test Location", maxAttendees: 60 };
             await expect(eventService.updateEventById(id, invalidEventData)).rejects.toThrow("Invalid event data provided.");
         });
+
+        it("should throw an error if attendees exceed maximum", async () => {
+            // Arrange
+            const eventId = 1;
+            const existingEvent = { id: eventId, title: "Test Event", maxAttendees: 10, date: new Date() };
+            const updatedEventData: EventEntity = { title: "Updated Test Event", description: "Desc", date: new Date(), location: "Loc", maxAttendees: 4 }; // Max attendees less than current attendees
+
+            const mockPrismaEventFindUnique = PRISMA.event.findUnique as jest.Mock;
+            mockPrismaEventFindUnique.mockResolvedValue(existingEvent);
+
+            // Mock EventRegistrationService dependency (getEventAttendeeCounts uses groupBy)
+            const mockPrismaEventRegistrationGroupBy = PRISMA.eventRegistration.groupBy as jest.Mock;
+            // Simulate 5 attendees for eventId 1
+            mockPrismaEventRegistrationGroupBy.mockResolvedValue([{ _count: { eventId: 5 }, eventId: eventId }]); 
+            
+            const mockPrismaEventUpdate = PRISMA.event.update as jest.Mock;
+
+            // Act & Assert
+            await expect(eventService.updateEventById(eventId, updatedEventData)).rejects.toThrow("Attendees exceed maximum.");
+            expect(mockPrismaEventUpdate).not.toHaveBeenCalled(); // Ensure update was not called
+        });
     });
 });

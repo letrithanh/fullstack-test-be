@@ -96,6 +96,13 @@ export default class EventService {
             throw new Error("Event not found.");
         }
 
+        const eventRegistrationService = new EventRegistrationService();
+        const mappedEventIdsAttendees = await eventRegistrationService.getEventAttendeeCounts();
+        const joinedAttendee = mappedEventIdsAttendees[event.id];
+        if (joinedAttendee > data.maxAttendees) {
+            throw new Error("Attendees exceed maximum.");
+        }
+
         return await PRISMA.event.update({
             where: {
                 id: id,
