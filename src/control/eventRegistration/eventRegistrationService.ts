@@ -2,6 +2,7 @@ import AttendeeService from "../attendee/attendeeService";
 import EventService from "../event/eventService";
 import AttendeeEntity from "../../entity/attendee/attendeeEntity";
 import PRISMA from "../../utils/prisma.client";
+import AttendeeValidator from "../attendee/attendeeValidator";
 
 export default class EventRegistrationService {
     private attendeeService: AttendeeService;
@@ -45,6 +46,10 @@ export default class EventRegistrationService {
         );
 
         if (!attendee) {
+            attendee = await this.attendeeService.getAttendeeByPhone(attendeeData.phone);
+        }
+
+        if (!attendee) {
             attendee = await this.attendeeService.createAttendee(attendeeData);
         }
 
@@ -59,6 +64,11 @@ export default class EventRegistrationService {
 
         if (existingRegistration) {
             throw new Error("Attendee is already registered for this event");
+        }
+
+        const attendeeValidator = new AttendeeValidator();
+        if (!attendeeValidator.isAttendeeValid(attendeeData)) {
+            throw new Error("Invalid attendee data");
         }
 
         return attendee;

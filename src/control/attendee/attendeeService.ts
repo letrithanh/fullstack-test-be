@@ -29,4 +29,17 @@ export default class AttendeeService {
             },
         });
     }
+
+    public async getAttendeeByPhone(phone: string): Promise<AttendeeEntity | null> {
+        const isPhoneMissing = !phone;
+        if (isPhoneMissing) {
+            throw new Error("Phone number must be provided");
+        }
+
+        return await PRISMA.attendee.findUnique({
+            where: {
+                phone: phone,
+            },
+        });
+    }
 }
