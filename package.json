@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --detectOpenHandles --forceExit",
-    "dev": "tsc && node dist/server.js"
+    "dev": "tsc && node dist/server.js",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
