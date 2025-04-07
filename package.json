@@ -5,7 +5,8 @@
   "scripts": {
     "test": "jest --detectOpenHandles --forceExit",
     "dev": "tsc && node dist/server.js",
-    "build": "tsc"
+    "build": "tsc",
+    "start": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
